@@ -1,6 +1,9 @@
 import React from 'react'
+import {useRouter} from "next/router"
 
 function BrandsList({brands}) {
+  const router = useRouter()
+
     return (
       <div className='p-2'>
         {brands.map(brand => (
@@ -21,7 +24,7 @@ function BrandsList({brands}) {
               {brand.description}
             </div>
             <div>
-                <button className='font-semibold w-full py-2 hover:text-gray-800'>Visit</button>
+                <button onClick={()=>router.push(`/${brand.id}`)} className='font-semibold w-full py-2 hover:text-gray-800'>Visit</button>
               </div>
             </div>
         ))}

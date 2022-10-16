@@ -6,7 +6,8 @@ const nextConfig = {
     domains: [
       "i.im.ge",
       "im.ge",
-      "drive.google.com"
+      "drive.google.com",
+      "media.gucci.com"
     ],
   },
 }
