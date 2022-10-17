@@ -1,10 +1,8 @@
 import Head from 'next/head'
 import BrandsList from '../components/BrandsList'
 import Header from '../components/Header'
-import { collection, getDocs} from "firebase/firestore"
-import {db} from "../firebase"
 
-export default function Home({brands}) {
+export default function Home() {  
   return (
     <div>
       <Head>
@@ -13,18 +11,7 @@ export default function Home({brands}) {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Header/>
-      <BrandsList brands={brands}/>
+      <BrandsList/>
     </div>
   )
-}
-
-export async function getServerSideProps() {
-  const brandsCollectionRef = collection(db,"brands")
-  const snapshot = await getDocs(brandsCollectionRef)
-  const docs = snapshot.docs.map(doc => doc.data())
-  return {
-      props: {
-          brands: docs
-      }, // will be passed to the page component as props
-  }
 }

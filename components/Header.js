@@ -16,6 +16,7 @@ function Header() {
                 src="https://i.im.ge/2022/09/16/1uISZp.Vrip-4-copia.png"
                 layout="fill"
                 objectFit="contain"
+                priority
             />
         </div>
 
@@ -24,6 +25,7 @@ function Header() {
                 src="https://i.im.ge/2022/09/16/1uIXGM.v-1-1.png"
                 layout="fill"
                 objectFit="contain"
+                priority
             />
         </div>
 
