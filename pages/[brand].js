@@ -3,7 +3,7 @@ import {useState, useEffect, useRef} from 'react'
 import { doc, getDoc, collection, getDocs, limit, query, startAfter, where } from 'firebase/firestore'
 import { db } from '../firebase'
 import Product from '../components/Product'
-import { ref } from 'firebase/storage'
+import useOnScreen from './hooks/useOnScreen'
 
 function BrandPage({brand}) {
   const [products,setProducts] = useState([])
@@ -70,7 +70,7 @@ function BrandPage({brand}) {
   return (
     <div>
       <Header />
-    <div className='bg-white rounded-lg mx-2 mt-4'>
+    <div className='bg-white rounded-lg mx-2 mt-4 pb-4 mb-4'>
       <div className='p-6'>
         <div className='flex mb-4 justify-between items-center'>
             <div className='flex cursor-pointer'>
@@ -98,7 +98,7 @@ function BrandPage({brand}) {
       </div>
       <div ref={bottomRef}/>
       {moreProductsToLoad ? (
-        <div className='text-center my-4 text-gray-500 text-xl'>Loading More Products...</div>
+        <div className='text-center my-5 text-gray-500 text-xl'>Loading More Products...</div>
       ):(<></>)}
       </div>
     </div>
@@ -117,27 +117,5 @@ return {
       props: {
           brand: data,
       },
-  }
-}
-
-function useOnScreen(ref) {
-  const [isIntersecting, setIntersecting] = useState(false)
-
-  try {
-    const observer = new IntersectionObserver(
-      ([entry]) => setIntersecting(entry.isIntersecting)
-    )
-
-    useEffect(() => {
-      observer.observe(ref.current)
-      // Remove the observer as soon as the component is unmounted
-      return () => { observer.disconnect() }
-    }, [])
-  
-    return isIntersecting
-  } catch (exceptionVar){
-    console.log(exceptionVar)
-  } finally {
-    return isIntersecting
   }
 }
