@@ -7,7 +7,7 @@ const nextConfig = {
       "i.im.ge",
       "im.ge",
       "drive.google.com",
-      "media.gucci.com"
+      "us.louisvuitton.com"
     ],
   },
 }

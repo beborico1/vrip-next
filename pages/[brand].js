@@ -1,11 +1,72 @@
-import React, {useState} from 'react'
-import { doc, getDoc, getDocs, collection, query, limit } from 'firebase/firestore'
-import { db } from '../firebase'
 import Header from '../components/Header'
-import Image from "next/image"
+import {useState, useEffect, useRef} from 'react'
+import { doc, getDoc, collection, getDocs, limit, query, startAfter, where } from 'firebase/firestore'
+import { db } from '../firebase'
+import Product from '../components/Product'
+import { ref } from 'firebase/storage'
 
-function BrandPage({brand, products}) {
-  const [productsLoaded,setProductsLoaded] = useState(products)
+function BrandPage({brand}) {
+  const [products,setProducts] = useState([])
+  const [moreProductsToLoad,setMoreProductsToLoad] = useState(false)
+  const [searchParams,setSearchParams] = useState({})
+  const productsCollectionRef = collection(db,`brands/${brand.id}/products`)
+  const bottomRef = useRef()
+  var reachedBottom = useOnScreen(bottomRef)
+
+  const loadProducts = async () => {
+    const gender = null
+    if (gender === null) {
+        const q = query(productsCollectionRef, where("brand_id", "==", `${brand.id}`),limit(12))
+        const data = await getDocs(q)
+        if (data.docs.length===0){
+          setMoreProductsToLoad(false)
+        } else {
+          setMoreProductsToLoad(true)
+        }
+        setProducts(data.docs)
+    } else {
+        const q = query(productsCollectionRef, where("brand_id", "==", `${brand.id}`),where("gender","==",`${gender}`),limit(12))
+        const data = await getDocs(q)
+        if (data.docs.length===0){
+          setMoreProductsToLoad(false)
+        } else {
+          setMoreProductsToLoad(true)
+        }
+        setProducts(data.docs)
+    }
+  }
+
+  const loadMoreProducts = async () => {
+    if (products.length === 0) {
+      return
+    }
+    const lastProduct = products[products.length-1]
+    const gender = null
+    if (gender === null) {
+        const q = query(productsCollectionRef, where("brand_id", "==", `${brand.id}`),limit(12),startAfter(lastProduct))
+        const data = await getDocs(q)
+        if (data.docs.length===0){
+            setMoreProductsToLoad(false)
+        }
+        setProducts([...products, ...data.docs])
+    } else {
+        const q = query(productsCollectionRef, where("brand_id", "==", `${brand.id}`),where("gender","==",`${gender}`),limit(12),startAfter(lastProduct))
+        const data = await getDocs(q)
+        if (data.docs.length===0){
+            setMoreProductsToLoad(false)
+        }
+        setProducts([...products, ...data.docs])
+    }
+  }
+
+  useEffect(() => {
+    loadProducts()
+  },[searchParams])
+
+  useEffect(() => {
+    loadMoreProducts()
+},[reachedBottom])
+
   return (
     <div>
       <Header />
@@ -28,20 +89,18 @@ function BrandPage({brand, products}) {
         </div>
       </div>
       <div className='grid grid-cols-2 lg:grid-cols-3'>
-                {productsLoaded.map(product => (
-                  <div key={product.id} className="h-full">
-
-                  <div className="p-1 h-full">
-                      <div className='flex justify-center w-full bg-gray-300'>
-                          <img className="object-contain w-full" alt="Product" src={product.front_image}/>                    
-                      </div>
-                  </div>
-      
-                      
-                  </div>
-                ))}
-        </div>
-    </div>
+        {products.map(product => (
+          <Product
+            key={product.id}
+            front_image={product.data().front_image}
+          />
+        ))}
+      </div>
+      <div ref={bottomRef}/>
+      {moreProductsToLoad ? (
+        <div className='text-center my-4 text-gray-500 text-xl'>Loading More Products...</div>
+      ):(<></>)}
+      </div>
     </div>
   )
 }
@@ -49,25 +108,36 @@ function BrandPage({brand, products}) {
 export default BrandPage
 
 export async function getServerSideProps(context) {
-  console.log("sd")
   const id = context.params.brand
   const brandCollectionRef = doc(db,`brands/${id}`)
   const snapshot = await getDoc(brandCollectionRef)
   const data = snapshot.data()
 
-  const productsCollectionRef = collection(db,`brands/${id}/products`)
-  const q = query(productsCollectionRef,limit(12))
-  const snapshot2 = await getDocs(q)
-
-
-  const products = snapshot2.docs.map(doc => (
-    {id:doc.id,...doc.data()}
-  ))
-
 return {
       props: {
           brand: data,
-          products,
       },
+  }
+}
+
+function useOnScreen(ref) {
+  const [isIntersecting, setIntersecting] = useState(false)
+
+  try {
+    const observer = new IntersectionObserver(
+      ([entry]) => setIntersecting(entry.isIntersecting)
+    )
+
+    useEffect(() => {
+      observer.observe(ref.current)
+      // Remove the observer as soon as the component is unmounted
+      return () => { observer.disconnect() }
+    }, [])
+  
+    return isIntersecting
+  } catch (exceptionVar){
+    console.log(exceptionVar)
+  } finally {
+    return isIntersecting
   }
 }
