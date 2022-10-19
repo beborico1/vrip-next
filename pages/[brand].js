@@ -88,12 +88,14 @@ function BrandPage({brand}) {
           {brand.description}
         </div>
       </div>
-      <div className='grid grid-cols-2 lg:grid-cols-3'>
+      <div className='grid grid-cols-2 lg:grid-cols-3 pl-1'>
         {products.map(product => (
-          <Product
-            key={product.id}
-            front_image={product.data().front_image}
-          />
+          <div className='mr-1 mb-1 bg-gray-300'>
+            <Product
+              key={product.id}
+              front_image={product.data().front_image}
+            />
+          </div>
         ))}
       </div>
       <div ref={bottomRef}/>
